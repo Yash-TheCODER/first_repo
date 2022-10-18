@@ -1,137 +1,109 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-int A[100];
-int n;
-int num;
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
 struct node
 {
     float info;
     struct node *link;
 };
-struct node *start = NULL;
-struct node *Insertionsort(struct node *list);
-void printbuckets(struct node *list);
-void bucketsort(float A[], int n);
-void printarray(float A[], int n);
+struct node *InsertionSort(struct node *list);
+void printBuckets(struct node *list);
+void Bucketsort(float A[],int n){
+	float b[n-1];
+	int i,j;
+	struct node **bucket;
+	bucket = (struct node **)malloc(sizeof(struct node *) * n);
+	for (i = 0; i < n; i++) {
+    bucket[i] = NULL;
+    }
+	for (i = 0; i < n; i++) {
+    struct node *curr;
+    int p = floor(A[i]*n);
+    curr= (struct node *)malloc(sizeof(struct node));
+    curr->info = A[i];
+    curr->link = bucket[p];
+    bucket[p] = curr;
+    }
+	for (i = 0; i < n; i++) {
+    bucket[i] = InsertionSort(bucket[i]);
+  	}
+    printf("sorted Bucket: ");
+  	for (i = 0; i < n; i++) {
+    printBuckets(bucket[i] );
+  	}
+	for (j = 0, i = 0; i < n; ++i) {
+    struct node *ptr;
+    ptr = bucket[i];
+    while (ptr!=NULL) {
+      A[j++] = ptr->info;
+      ptr = ptr->link;
+    }
+  }
+
+  return;
+}
+struct node *InsertionSort(struct node *list) {
+  struct node *p, *List;
+  if (list == 0 || list->link == 0) {
+    return list;
+  }
+
+  List = list;
+  p = list->link;
+  List->link = 0;
+  while (p != 0) {
+    struct node *ptr;
+    if (List->info > p->info) {
+      struct node *temp;
+      temp = p;
+      p = p->link;
+      temp->link = List;
+      List = temp;
+      continue;
+    }
+
+    for (ptr = List; ptr->link != 0; ptr = ptr->link) {
+      if (ptr->link->info > p->info)
+        break;
+    }
+
+    if (ptr->link != 0) {
+      struct node *temp;
+      temp = p;
+      p = p->link;
+      temp->link = ptr->link;
+      ptr->link = temp;
+      continue;
+    } else {
+      ptr->link = p;
+      p = p->link;
+      ptr->link->link = 0;
+      continue;
+    }
+  }
+  return List;
+}
+void printBuckets(struct node *list) {
+  struct node *cur = list;
+  while (cur!=NULL) {
+    printf("%f ", cur->info);
+    cur = cur->link;
+  }
+}
+
 int main()
 {
-    int choice, i, n;
-    float A[20];
-    printf("Enter number of element in array:---> ");
-    scanf("%d", &n);
-    printf("Enter the %d Array elements--->\n", n);
-    for (i = 1; i <= n; i++)
-    {
-        printf("A[%d] = ", i);
-        scanf("%f", &A[i]);
-    }
-    bucketsort(A, n);
-    printarray(A, n);
-    return 0;
+int i,n;
+float A[20];
+printf("Enter the value of n: ");
+scanf("%d", &n);
+printf("Enter the %d array elements \n",n);
+for(i=0;i<n;i++)
+{
+printf("A[%d]=",i);
+scanf("%f",A+i);
 }
+Bucketsort(A,n);
 
-void printarray(float A[], int n)
-{
-    printf("\n****Sorted Array****\n");
-    for (int i = 1; i <= n; ++i)
-        printf("%.2f  ", A[i]);
-}
-void printbuckets(struct node *head)
-{
-    struct node *ptr = head;
-    while (ptr != NULL)
-    {
-        printf("%.2f ", ptr->info);
-        ptr = ptr->link;
-    }
-}
-struct node *sort(struct node *node1, struct node *arranged)
-{
-    if (arranged == NULL || arranged->info >= node1->info)
-    {
-        node1->link = arranged;
-        arranged = node1;
-    }
-    else
-    {
-        struct node *ptr = arranged;
-        while (ptr->link != NULL && ptr->link->info < node1->info)
-        {
-            ptr = ptr->link;
-        }
-        node1->link = ptr->link;
-        ptr->link = node1;
-    }
-    return arranged;
-}
-struct node *Insertionsort(struct node *head)
-{
-    struct node *ptr = head;
-    struct node *arranged = NULL;
-    while (ptr != NULL)
-    {
-        struct node *next = ptr->link;
-        arranged = sort(ptr, arranged);
-        ptr = next;
-    }
-    return arranged;
-}
-void bucketsort(float A[], int n)
-{
-    int j;
-    struct node *B[n];
-    for (int i = 1; i <= n; i++)
-    {
-        B[i] = NULL;
-    }
-    for (int i = 1; i <= n; i++)
-    {
-        j = floor(n * A[i]);
-        struct node *ptr3;
-        ptr3 = (struct node *)malloc(sizeof(struct node));
-        ptr3->info = A[i];
-        ptr3->link = B[j];
-        B[j] = ptr3;
-    }
-    for (int i = 1; i <= n; i++)
-    {
-        B[i] = Insertionsort(B[i]);
-    }
-    int choice;
-    printf("press 1 if you want to print bucket\n");
-    scanf("%d",&choice);
-    if(choice == 1)
-    {
-        printf("<-----Bucket Lists---->\n");
-    }
-    int i = 1;
-    while (i <= n)
-    {
-        for (int j = 1; j <= n; j++)
-        {
-            if (B[j] == NULL)
-            {
-                printf("%d : NULL\n",j);
-                continue;
-            }
-            else
-            {
-                struct node *ptr = B[j];
-
-                if (choice == 1)
-                {   
-                    printf("%d : ",j);
-                    printbuckets(B[j]);
-                    printf("\n");
-                }
-                while (ptr != NULL)
-                {
-                    A[i] = ptr->info;
-                    i++;
-                    ptr = ptr->link;
-                }
-            }
-        }
-    }
+return 0;
 }
